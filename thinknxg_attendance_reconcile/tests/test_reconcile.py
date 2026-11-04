@@ -614,6 +614,34 @@ class TestThinkNXGAttendanceReconcile(TestCase):
         log = frappe.get_doc(AUDIT_LOG, {"previous_attendance": w.absent})
         self.assertEqual(frappe.db.get_value(RECONCILIATION, log.reconciliation, "run_type"), "Scheduled")
 
+    def test_preview_has_no_limit_by_default(self):
+        """More absences than the old 200 cap are all previewed when the limit is 0."""
+        import time
+
+        w = World(day=add_days(nowdate(), -46))
+        s = w.shift("09:00:00", "17:00:00")
+        employees = [w.employee] + [w.make_employee() for _ in range(4)]
+        for employee in employees:
+            w.assign(s, employee=employee, start=w.day, end=add_days(nowdate(), -1))
+        run_hrms(s)  # 5 employees x ~45 working days of auto-attendance absences
+        expected = frappe.db.count("Attendance", {"employee": ["in", employees], "status": "Absent", "docstatus": 1})
+        self.assertGreater(expected, 200)
+
+        frappe.db.set_single_value(SETTINGS, "max_records_per_run", 0)
+        frappe.clear_document_cache(SETTINGS, SETTINGS)
+        rows = 0
+        started = time.monotonic()
+        for employee in employees:
+            run = frappe.get_doc({"doctype": RECONCILIATION, "employee": employee,
+                                  "from_date": w.day, "to_date": nowdate()}).insert()
+            run.preview()
+            run.reload()
+            self.assertFalse(run.truncated)
+            rows += len(run.items)
+        elapsed = time.monotonic() - started
+        self.assertEqual(rows, expected)
+        print(f"\n[throughput] previewed {rows} absences in {elapsed:.1f}s ({1000 * elapsed / rows:.0f} ms each)")
+
     def test_run_requires_preview_before_reconcile(self):
         w = World()
         run = frappe.get_doc({"doctype": RECONCILIATION, "from_date": w.day, "to_date": w.day}).insert()

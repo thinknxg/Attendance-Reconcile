@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate
 
-from thinknxg_attendance_reconcile import compat
+from thinknxg_attendance_reconcile import compat, service
 from thinknxg_attendance_reconcile.constants import (
     ACTION_ERROR,
     ACTION_NO_CHANGE,
@@ -99,7 +99,7 @@ class thinkNXGAttendanceReconciliation(Document):
         frappe.enqueue(
             "thinknxg_attendance_reconcile.service.run_job",
             queue="long",
-            timeout=3600,
+            timeout=service.JOB_TIMEOUT,
             job_id=self.job_id,
             deduplicate=True,
             enqueue_after_commit=True,

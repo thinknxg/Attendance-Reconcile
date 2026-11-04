@@ -13,5 +13,5 @@ class thinkNXGAttendanceReconcileSettings(Document):
             frappe.throw(_("Lookback Days must be between 1 and 92."))
         if not 0 <= cint(self.sync_grace_minutes) <= 1440:
             frappe.throw(_("Grace Minutes must be between 0 and 1440."))
-        if not 1 <= cint(self.max_records_per_run) <= 5000:
-            frappe.throw(_("Max Absences per Manual Preview must be between 1 and 5000."))
+        if cint(self.max_records_per_run) < 0:
+            frappe.throw(_("Max Absences per Manual Preview cannot be negative (0 means no limit)."))

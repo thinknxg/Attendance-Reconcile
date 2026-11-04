@@ -29,7 +29,7 @@ from thinknxg_attendance_reconcile.constants import (
 )
 
 APPLY_LOCK = "thinknxg-attendance-reconcile-apply"
-JOB_TIMEOUT = 3600
+JOB_TIMEOUT = 4 * 3600  # long queue; unlimited previews can cover many thousands of absences
 
 STATUS_FILTERS = {
     "Eligible": {ACTION_REPLACE},
@@ -186,13 +186,13 @@ def notify(name, status):
 
 def preview(doc):
     settings = get_settings()
-    cap = cint(settings.max_records_per_run) or 1000
+    cap = cint(settings.max_records_per_run)  # 0 = no limit
     doc.db_set({"status": "In Progress", "error_message": None}, update_modified=False)
     _commit()
-    names = absence_names(doc, cap + 1)
+    names = absence_names(doc, cap + 1 if cap > 0 else None)
     wanted = STATUS_FILTERS.get(doc.status_filter or "All")
     cache, rows = {}, []
-    for name in names[:cap]:
+    for name in names[:cap] if cap > 0 else names:
         row = evaluate(name, settings, cache)
         if doc.shift_type and doc.shift_type not in (row["current_shift"], row["proposed_shift"]):
             continue
@@ -202,7 +202,7 @@ def preview(doc):
 
     doc.reload()
     doc.set("items", rows)
-    doc.truncated = cint(len(names) > cap)
+    doc.truncated = cint(cap > 0 and len(names) > cap)
     doc.previewed_on = now_datetime()
     doc.status = "Previewed"
     doc.update_counts()
