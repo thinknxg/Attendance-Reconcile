@@ -63,6 +63,7 @@ thinkNXG HR's duplicate validation still applies.
 1. Fix Shift Assignments or default shifts and finish the biometric sync.
 2. Open **thinkNXG Attendance Reconcile Settings** and set:
    * lookback;
+   * **Max Absences per Manual Preview** (default **0 = no limit**: every matching absence is previewed);
    * grace minutes;
    * freeze date;
    * whether proven conflict skips may be cleared automatically (default on).
@@ -141,7 +142,7 @@ bench --site test-site run-tests --app thinknxg_attendance_reconcile
 PYTHONPATH=. python -m unittest discover -s tests -v    # framework-free checks
 ```
 
-The bench suite has 26 tests. It uses the real Auto Attendance engine to produce absences and
+The bench suite has 27 tests. It uses the real Auto Attendance engine to produce absences and
 conflict skips, and passes on thinkNXG HR 15.64 and 16.53.
 
 ## Known limits
