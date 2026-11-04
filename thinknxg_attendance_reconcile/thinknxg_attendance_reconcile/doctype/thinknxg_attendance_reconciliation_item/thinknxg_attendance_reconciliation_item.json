@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "creation": "2026-11-04 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "selected",
+  "employee",
+  "employee_name",
+  "attendance",
+  "attendance_date",
+  "existing_status",
+  "proposed_status",
+  "column_break_shift",
+  "current_shift",
+  "proposed_shift",
+  "checkin_count",
+  "checkins",
+  "working_hours",
+  "skip_status",
+  "decision_section",
+  "absence_origin",
+  "proposed_action",
+  "review_required",
+  "reason",
+  "column_break_result",
+  "result",
+  "replacement_attendance",
+  "audit_log",
+  "error_log"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "selected",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Select"
+  },
+  {
+   "columns": 2,
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attendance",
+   "fieldtype": "Link",
+   "label": "Attendance",
+   "options": "Attendance",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "attendance_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Attendance Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "existing_status",
+   "fieldtype": "Data",
+   "label": "Existing Status",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "proposed_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Proposed Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_shift",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "current_shift",
+   "fieldtype": "Link",
+   "label": "Shift on Attendance",
+   "options": "Shift Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "proposed_shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Shift Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checkin_count",
+   "fieldtype": "Int",
+   "label": "Check-ins Found",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checkins",
+   "fieldtype": "Small Text",
+   "label": "Check-in Records",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Working Hours",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "skip_status",
+   "fieldtype": "Small Text",
+   "label": "Skip Auto Attendance Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decision_section",
+   "fieldtype": "Section Break",
+   "label": "Decision"
+  },
+  {
+   "fieldname": "absence_origin",
+   "fieldtype": "Data",
+   "label": "Absence Origin",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "proposed_action",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Proposed Action",
+   "options": "Replace Attendance\nNo Change\nWait for Sync\nHR Review\nError",
+   "read_only": 1
+  },
+  {
+   "fieldname": "review_required",
+   "fieldtype": "Check",
+   "label": "HR Review Required",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_result",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "default": "Pending",
+   "fieldname": "result",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Result",
+   "options": "Pending\nCorrected\nNo Change\nWait for Sync\nHR Review\nError",
+   "read_only": 1
+  },
+  {
+   "fieldname": "replacement_attendance",
+   "fieldtype": "Link",
+   "label": "Corrected Attendance",
+   "options": "Attendance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "audit_log",
+   "fieldtype": "Link",
+   "label": "Audit Log",
+   "options": "thinkNXG Attendance Reconcile Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Link",
+   "label": "Error Log",
+   "options": "Error Log",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-04 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "thinkNXG Attendance Reconcile",
+ "name": "thinkNXG Attendance Reconciliation Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

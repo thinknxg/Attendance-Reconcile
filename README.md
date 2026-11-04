@@ -1,163 +1,156 @@
-# Attendance Reconciliation for Frappe HR
+# thinkNXG Attendance Reconcile
 
-Custom app targeting matching Frappe / ERPNext / HRMS v15 or v16 installations.
-Version: 0.1.0. No core files are edited.
+Safely corrects **Absent** attendance in **thinkNXG HR** (v15 and v16) when the absence was
+generated before the right shift or the biometric punches were available:
 
-## What it does
+* the shift was assigned late and **Fetch Shift** was run afterwards;
+* biometric check-ins synced after Auto Attendance had already marked the day Absent;
+* the late check-ins were then marked **Skip Auto Attendance** because they collided with that absence.
 
-Reprocesses **existing submitted Absent Attendance** after late shift assignments
-or late biometric imports. It fetches shifts from check-in timestamps, uses HRMS's
-attendance calculator, cancels the eligible absence and creates submitted Present
-or Half Day Attendance. Check-ins are linked to the replacement. Cancelled records
-are retained, with an immutable reconciliation audit and run history.
+thinkNXG HR stays the attendance engine. The app resolves shifts, calculates status and hours, and
+creates and links attendance through the standard thinkNXG HR code. It cancels and replaces the
+absence through the normal document lifecycle, and it never edits thinkNXG HR or thinkNXG Framework
+core files.
 
-Includes an HR settings form with Preview and Run buttons, background jobs, and an
-optional hourly scheduler. Automatic processing is disabled on installation.
-The job rereads and revalidates records rather than trusting an earlier preview.
+App name: `thinknxg_attendance_reconcile` · Version 1.0.0 · License MIT · Support: https://thinknxg.com/support
 
-This app does not import biometric data, assign missing shifts, create attendance
-for dates with no existing absence, or force Present from an isolated punch.
-The biometric integration must update Last Sync of Checkin only after importing
-all punches through that timestamp. Elapsed time alone cannot prove sync completeness.
+## How a correction is decided
+
+For each submitted Absent attendance in scope:
+
+1. **Origin (Rule 3).** The absence must carry the marker thinkNXG HR Auto Attendance writes ("Employee
+   was marked Absent due to missing Employee Checkins." or the working-hours-threshold note), or an
+   HR Manager must have ticked **Approve Absence Reconciliation**. Amended or manual records go to HR review.
+2. **Leave and payroll (Rule 4).** Correction is blocked by:
+   * a leave reference on the attendance;
+   * an Open or Approved Leave Application;
+   * a submitted Attendance Request;
+   * a submitted Salary Slip, or an Overtime Slip on v16;
+   * the freeze date.
+3. **Shift.** Every check-in from the day before to the day after is re-resolved with thinkNXG HR's
+   own shift logic (`get_actual_start_end_datetime_of_shift`, the function behind Fetch Shift). Check-ins
+   are grouped by **shift start date**, so night shifts belong to the day they began. Check-ins owned by
+   another active attendance are left alone. Multiple shift instances on one date go to HR review
+   unless exactly one matches the absence's shift.
+4. **Skip Auto Attendance (Rule 2).** A skipped check-in takes part only when:
+   * thinkNXG HR recorded that it was skipped because it collided with *this* absence, or with an
+     attendance that has since been cancelled. The proof is the HRMS "Reason for skipping auto
+     attendance" record, which links the conflicting attendance; or
+   * an HR Manager ticked **Approve Reconciliation of Skipped Log**.
+
+   Imports that set the skip themselves, validation-error skips, and logs whose **Skip Reason** is
+   *Intentional* are never cleared automatically.
+5. **Completeness.** The shift's actual end plus the grace period must have passed, and **Last Sync of
+   Checkin** must be later than the shift's actual end. Otherwise the row is *Wait for Sync* and is retried later.
+6. **Calculation (Rule 1).** `ShiftType.get_attendance` produces the status, using the v16 thresholds and
+   half-holiday halving where available. *Absent* means no change. A single punch, or no valid IN/OUT
+   pair, goes to HR review. A punch alone never produces Present.
+7. **Apply.** Under row locks:
+   * the absence is cancelled (thinkNXG HR unlinks its check-ins);
+   * each log is re-fetched with `fetch_shift()` and saved the way thinkNXG HR's bulk Fetch Shift does;
+   * only proven skips are cleared;
+   * `mark_attendance_and_link_log` creates the submitted Present or Half Day attendance with all
+     Attendance validations;
+   * the audit log is written.
+
+   If anything fails, that employee/date rolls back completely and the run continues with the next record.
+
+Running it again is safe. A replaced absence is cancelled, so a second run reports *No Change*, and
+thinkNXG HR's duplicate validation still applies.
+
+## Using it
+
+1. Fix Shift Assignments or default shifts and finish the biometric sync.
+2. Open **thinkNXG Attendance Reconcile Settings** and set:
+   * lookback;
+   * grace minutes;
+   * freeze date;
+   * whether proven conflict skips may be cleared automatically (default on).
+3. Create a **thinkNXG Attendance Reconciliation**. You can filter by:
+   * Company, Employee, Department and Shift Type;
+   * From and To Date;
+   * Reconciliation Status.
+4. **Preview Reconciliation** runs in the background and lists each absence with:
+   * existing and proposed status, and shift;
+   * check-ins found, working hours and Skip Auto Attendance status;
+   * proposed action, reason, and whether HR review is required.
+
+   Preview changes nothing.
+5. **Reconcile → Reconcile Selected** or **Reconcile All Eligible** queues the corrections. Every row is
+   revalidated at execution time.
+6. **View Reconciliation History** opens **thinkNXG Attendance Reconcile Log**. Each entry records:
+   * the previous and corrected attendance, statuses and shifts;
+   * every check-in with its previous and new shift, skip flag and skip origin;
+   * the reason, who ran it and when;
+   * failures, with error details.
+7. After validating on staging, tick **Enable Hourly Reconciliation**. Scheduled runs keep a record only
+   when they corrected something or hit an error.
+
+For an absence or skipped log that needs a human decision, verify it, tick the approval box on the
+Attendance or Employee Checkin (HR Manager only), and preview again.
+
+Access: HR Manager or System Manager. Background jobs run as the requesting user, so document and
+employee permissions apply. System Manager sees all runs; other users see runs they created. Audit
+logs follow Employee user permissions.
 
 ## Installation
 
-Use a Linux bench/server with the matching major versions of Frappe, ERPNext and
-HRMS already installed. Windows is suitable for viewing this source package;
-install it into your Frappe server. Take a site backup and install on staging first.
-
-Install directly from this repository. The app's internal name is
-`attendance_reconciliation`:
+Back up first and install on staging before production.
 
 ```sh
 cd /path/to/frappe-bench
 bench --site your-site backup --with-files
-bench get-app attendance_reconciliation https://github.com/thinknxg/Attendance-Reconcile.git --branch main
-bench --site your-site install-app attendance_reconciliation
+bench get-app thinknxg_attendance_reconcile https://github.com/thinknxg/Attendance-Reconcile.git
+bench --site your-site install-app thinknxg_attendance_reconcile
 bench --site your-site migrate
-bench build --app attendance_reconciliation
+bench build --app thinknxg_attendance_reconcile
 bench restart
 ```
 
-For Frappe Cloud or managed hosting, put this source in your own Git repository and
-use your host's custom-app deployment workflow. Custom apps require a compatible plan.
+On thinkNXG Cloud (https://thinknxgcloud.com), add this repository through the custom-app deployment workflow.
 
-The install/migrate hook creates three custom fields and grants HR Manager and
-System Manager read/write access at permission level 1 on Attendance and Employee
-Checkin so they can approve historical corrections. Existing level 0 permissions
-and user restrictions still apply. Review your site's custom permission setup.
+Installation adds these custom fields:
 
-## First use
+* On **Attendance**: *Created by Auto Attendance*, *Approve Absence Reconciliation* and *Reconciled From*.
+* On **Employee Checkin**: *Skip Reason*, *Conflicting Attendance* and *Approve Reconciliation of Skipped Log*.
 
-1. Correct Shift Assignments / Employee Default Shift and complete biometric sync.
-2. Open **Attendance Reconciliation Settings** from the Desk search.
-3. Set the lookback (default 30 days), grace period after actual shift end (60 minutes),
-   and optional **Do Not Change Attendance On or Before** cutoff. Save.
-4. For older or manually created absences, open Attendance and check
-   **Approve Absence Reconciliation**, then save.
-5. For skipped check-ins that should participate, open each relevant Employee
-   Checkin and check **Approve Reconciliation of Skipped Log**, then save.
-   Intentional exclusions must remain unapproved.
-6. Click **Preview Reconciliation**, choose dates and optionally an employee.
-   Review Ready / Review / Error rows. Narrow the selection if it exceeds 200 absences.
-7. Click **Run Reconciliation** with the desired scope. It queues a background job.
-   Open **Attendance Reconciliation Run** for results, and **Attendance
-   Reconciliation Log** for successful correction details.
-8. Enable hourly reconciliation after validating the staging results.
+It then backfills the auto-attendance and skip markers from the records thinkNXG HR has already written.
+No permissions are customised: approval fields are protected by validation hooks. Keep the scheduler,
+a `long` queue worker and Redis running.
 
-HR Manager or System Manager is required. Read, write, cancel, create and submit
-permissions are checked where appropriate; the background job retains its requesting
-user. A manager can read their own run history; System Manager can read all runs.
-Employee restrictions also apply to the employee-linked correction audit.
+### Upgrading from the pre-rebrand `attendance_reconciliation` app
 
-## Eligibility and safety
+```sh
+bench get-app thinknxg_attendance_reconcile https://github.com/thinknxg/Attendance-Reconcile.git
+bench --site your-site install-app thinknxg_attendance_reconcile   # copies custom_ar_* values and legacy logs
+bench --site your-site migrate
+# verify the migrated data, then:
+bench --site your-site uninstall-app attendance_reconciliation
+bench remove-app attendance_reconciliation
+```
 
-* Existing absence must have an app-recorded auto-attendance origin or explicit
-  HR approval. Future automatic Attendance is stamped by the Shift Type subclass.
-  Historical origin is never guessed from ownership or comments.
-* **Skipped logs always require explicit per-log approval**, including skips made
-  by HRMS itself: the standard checkbox does not reliably record the skip reason.
-  Once used, that approval and the Skip Auto Attendance flag are cleared.
-* Shift assignment must resolve to exactly one shift instance on the attendance
-  date. Overnight punches are grouped using the shift start date, not calendar date.
-* Date must pass the freeze cutoff, shift end plus grace period, and Last Sync of
-  Checkin. Process Attendance After and the shift holiday policy are respected.
-* Submitted overlapping Salary Slips, approved leave, leave-linked Attendance,
-  and any other active Attendance on the same date block correction.
-* A valid IN/OUT interval and positive working hours are required. Insufficient
-  hours remain Absent; Half Day follows the configured shift thresholds.
-* V16 calculation supports its explicit thresholds, half-holiday adjustments and
-  overtime parameter when available. Earlier signatures use the V15 path.
-* Each correction uses a savepoint. Failure to create/link the replacement or write
-  its audit rolls back cancellation and check-in changes for that employee/date.
-  Earlier successful corrections remain committed if a later record fails.
-* A site-scoped Redis lock serializes app runs. Employee, target Attendance and
-  existing check-ins are locked during correction. HRMS duplicate validation remains
-  active. Standard auto-attendance and biometric imports can still run independently;
-  if they race and cause a conflict, the correction should roll back and be retried.
-* Manual runs process up to 200 absences. Hourly runs page through the lookback
-  using a name cursor, so review-only records cannot starve later eligible records.
-  Very large sites should tune queue timeouts and lookback on staging.
+Uninstalling the old app drops its DocTypes, so verify the migrated **thinkNXG Attendance Reconcile Log**
+entries first. Its custom fields (`custom_ar_*`) and the custom permission rows it added on Attendance and
+Employee Checkin stay behind. Remove them manually if you no longer want them.
 
-The app overrides the Shift Type controller only to stamp provenance around standard
-auto-attendance processing. If another app overrides Shift Type, combine the
-controllers or resolve hook priority before deployment. Otherwise origin stamping
-may be unavailable. HR approval is still available for unstamped absences.
-
-## Tests and verification status
-
-Local verification: **30 framework-free contract tests passed**, plus Python syntax,
-DocType JSON and JavaScript syntax checks. These exercise version adapters,
-eligibility rules, preview behavior, repeat processing, rollback orchestration,
-queue responses and pagination. They use test doubles; they do not validate a real
-Frappe database, permissions engine or Redis.
-
-A live bench suite is included. Run on disposable staging sites for **each** major
-version after installation and with a test Company configured:
+## Tests
 
 ```sh
 bench --site test-site set-config allow_tests true
-bench --site test-site run-tests --app attendance_reconciliation \
-  --module attendance_reconciliation.tests.test_live
+bench --site test-site run-tests --app thinknxg_attendance_reconcile
+PYTHONPATH=. python -m unittest discover -s tests -v    # framework-free checks
 ```
 
-The live suite tests preview/apply/repeat, approved and unapproved skips, and database
-rollback. It has not been executed in the authoring environment because Frappe,
-HRMS, a database and Redis are not installed here. Do not treat this package as
-production-certified until both version-specific staging runs pass.
+The bench suite has 26 tests. It uses the real Auto Attendance engine to produce absences and
+conflict skips, and passes on thinkNXG HR 15.64 and 16.53.
 
-Additional staging acceptance checks: late shift assignment; overnight shift;
-strict IN/OUT pairing; multiple valid punch pairs; Half Day thresholds; V16 half
-holidays and overtime; salary/leave/freeze blocks; an HR user restricted to one
-employee; concurrent standard auto-attendance and imports; and a lookback with more
-than 200 review-only absences followed by eligible corrections.
+## Known limits
 
-Framework-free tests (from this folder):
+* An absence on a date with no check-ins for its employee is reported as *No Change*. Missing punches
+  must be imported first.
+* A finalized payroll recorded outside Salary Slip or Overtime Slip, such as an external payroll system,
+  is not detected. Use the freeze date.
+* If another app overrides the thinkNXG HR attendance functions this app calls, test the combination
+  on staging.
 
-```sh
-PYTHONPATH=. python -m unittest discover -s tests -v
-```
-
-## Operations
-
-Keep scheduler, long-queue worker and Redis running. Check Error Log / RQ Job for
-technical failures and run history for review reasons. Hourly jobs reconcile changes
-within the lookback; there are no immediate import or shift-assignment event jobs.
-
-Set the freeze cutoff when payroll is finalized. The app blocks submitted Salary
-Slips; it does not infer closure in external payroll systems or custom workflows.
-It never recalculates payroll automatically.
-
-To stop automation, uncheck Enable Hourly Reconciliation. Back up audit data before
-uninstalling; custom fields and custom permission rows are deliberately not deleted
-automatically. Existing corrections are not undone by disabling or uninstalling.
-
-## References checked
-
-* [HRMS V15 Employee Checkin](https://github.com/frappe/hrms/blob/version-15/hrms/hr/doctype/employee_checkin/employee_checkin.py)
-* [HRMS V16 Employee Checkin](https://github.com/frappe/hrms/blob/version-16/hrms/hr/doctype/employee_checkin/employee_checkin.py)
-* [HRMS V15 Shift Type](https://github.com/frappe/hrms/blob/version-15/hrms/hr/doctype/shift_type/shift_type.py)
-* [HRMS V16 Shift Type](https://github.com/frappe/hrms/blob/version-16/hrms/hr/doctype/shift_type/shift_type.py)
-* [Frappe V15 background jobs](https://github.com/frappe/frappe/blob/version-15/frappe/utils/background_jobs.py)
-
-License: MIT. HRMS remains a separately installed upstream dependency.
+Documentation: https://docs.thinknxg.com/thinknxghr
