@@ -1,2 +1,2 @@
-recursive-include attendance_reconciliation *.json *.js *.txt *.md
-include license.txt
+recursive-include thinknxg_attendance_reconcile *.json *.js *.txt *.md *.py
+include license.txt README.md

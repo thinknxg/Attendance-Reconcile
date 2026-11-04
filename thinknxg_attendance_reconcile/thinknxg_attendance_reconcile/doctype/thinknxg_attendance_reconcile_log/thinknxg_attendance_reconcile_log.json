@@ -1,0 +1,249 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-11-04 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "processing_status",
+  "employee",
+  "employee_name",
+  "company",
+  "attendance_date",
+  "column_break_head",
+  "reconciliation",
+  "run_type",
+  "executed_by",
+  "executed_on",
+  "absence_origin",
+  "attendance_section",
+  "previous_attendance",
+  "original_status",
+  "original_shift",
+  "column_break_attendance",
+  "corrected_attendance",
+  "new_status",
+  "corrected_shift",
+  "calculation_section",
+  "working_hours",
+  "late_entry",
+  "early_exit",
+  "column_break_calc",
+  "in_time",
+  "out_time",
+  "reason_section",
+  "reason",
+  "checkins",
+  "error_details",
+  "details"
+ ],
+ "fields": [
+  {
+   "fieldname": "processing_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Processing Status",
+   "options": "Corrected\nFailed"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "search_index": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "attendance_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Attendance Date",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_head",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reconciliation",
+   "fieldtype": "Link",
+   "label": "Reconciliation Run",
+   "options": "thinkNXG Attendance Reconciliation"
+  },
+  {
+   "fieldname": "run_type",
+   "fieldtype": "Data",
+   "label": "Run Type"
+  },
+  {
+   "fieldname": "executed_by",
+   "fieldtype": "Link",
+   "label": "Executed By",
+   "options": "User"
+  },
+  {
+   "fieldname": "executed_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Executed On"
+  },
+  {
+   "fieldname": "absence_origin",
+   "fieldtype": "Data",
+   "label": "Absence Origin"
+  },
+  {
+   "fieldname": "attendance_section",
+   "fieldtype": "Section Break",
+   "label": "Attendance"
+  },
+  {
+   "fieldname": "previous_attendance",
+   "fieldtype": "Link",
+   "label": "Previous Attendance",
+   "options": "Attendance",
+   "search_index": 1
+  },
+  {
+   "fieldname": "original_status",
+   "fieldtype": "Data",
+   "label": "Original Status"
+  },
+  {
+   "fieldname": "original_shift",
+   "fieldtype": "Link",
+   "label": "Original Shift",
+   "options": "Shift Type"
+  },
+  {
+   "fieldname": "column_break_attendance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "corrected_attendance",
+   "fieldtype": "Link",
+   "label": "Corrected Attendance",
+   "options": "Attendance"
+  },
+  {
+   "fieldname": "new_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "New Status"
+  },
+  {
+   "fieldname": "corrected_shift",
+   "fieldtype": "Link",
+   "label": "Corrected Shift",
+   "options": "Shift Type"
+  },
+  {
+   "fieldname": "calculation_section",
+   "fieldtype": "Section Break",
+   "label": "thinkNXG HR Calculation"
+  },
+  {
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "label": "Working Hours",
+   "precision": "2"
+  },
+  {
+   "fieldname": "late_entry",
+   "fieldtype": "Check",
+   "label": "Late Entry"
+  },
+  {
+   "fieldname": "early_exit",
+   "fieldtype": "Check",
+   "label": "Early Exit"
+  },
+  {
+   "fieldname": "column_break_calc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "in_time",
+   "fieldtype": "Datetime",
+   "label": "In Time"
+  },
+  {
+   "fieldname": "out_time",
+   "fieldtype": "Datetime",
+   "label": "Out Time"
+  },
+  {
+   "fieldname": "reason_section",
+   "fieldtype": "Section Break",
+   "label": "Reason"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reconciliation Reason"
+  },
+  {
+   "fieldname": "checkins",
+   "fieldtype": "Table",
+   "label": "Employee Checkins",
+   "options": "thinkNXG Attendance Reconcile Log Checkin"
+  },
+  {
+   "depends_on": "eval:doc.error_details",
+   "fieldname": "error_details",
+   "fieldtype": "Code",
+   "label": "Error Details"
+  },
+  {
+   "depends_on": "eval:doc.details",
+   "fieldname": "details",
+   "fieldtype": "Code",
+   "label": "Additional Details",
+   "options": "JSON"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-04 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "thinkNXG Attendance Reconcile",
+ "name": "thinkNXG Attendance Reconcile Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

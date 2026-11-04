@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "creation": "2026-11-04 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "automation_section",
+  "enabled",
+  "lookback_days",
+  "max_records_per_run",
+  "column_break_auto",
+  "sync_grace_minutes",
+  "freeze_through",
+  "skip_section",
+  "auto_reset_conflict_skips",
+  "help_section",
+  "help"
+ ],
+ "fields": [
+  {
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
+  },
+  {
+   "default": "0",
+   "description": "Automatically correct eligible absences in the lookback window. Off by default; validate with Preview first.",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enable Hourly Reconciliation"
+  },
+  {
+   "default": "30",
+   "fieldname": "lookback_days",
+   "fieldtype": "Int",
+   "label": "Lookback Days",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "default": "1000",
+   "fieldname": "max_records_per_run",
+   "fieldtype": "Int",
+   "label": "Max Absences per Manual Preview",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_auto",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "60",
+   "description": "Extra wait after the shift's actual end before a date is considered complete.",
+   "fieldname": "sync_grace_minutes",
+   "fieldtype": "Int",
+   "label": "Grace Minutes After Actual Shift End",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "description": "Set this when payroll for a period is finalized.",
+   "fieldname": "freeze_through",
+   "fieldtype": "Date",
+   "label": "Do Not Change Attendance On or Before"
+  },
+  {
+   "fieldname": "skip_section",
+   "fieldtype": "Section Break",
+   "label": "Skip Auto Attendance"
+  },
+  {
+   "default": "1",
+   "description": "Clear Skip Auto Attendance only when thinkNXG HR recorded that the check-in collided with the absence being replaced (or with an attendance since cancelled). All other skips need HR approval on the check-in.",
+   "fieldname": "auto_reset_conflict_skips",
+   "fieldtype": "Check",
+   "label": "Auto-clear Skips Proven to be Attendance Conflicts"
+  },
+  {
+   "fieldname": "help_section",
+   "fieldtype": "Section Break",
+   "label": "How it works"
+  },
+  {
+   "fieldname": "help",
+   "fieldtype": "HTML",
+   "label": "Help",
+   "options": "<p>Open <b>thinkNXG Attendance Reconciliation</b>, set filters and click <b>Preview</b>. Nothing changes until you click <b>Reconcile Selected</b> or <b>Reconcile All Eligible</b>.</p><p>Only absences created by thinkNXG HR Auto Attendance, or ticked <i>Approve Absence Reconciliation</i>, are corrected. Approved or pending leave, attendance requests, submitted salary or overtime slips and the freeze date block correction. Every correction is recorded in <b>thinkNXG Attendance Reconcile Log</b>.</p>"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-04 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "thinkNXG Attendance Reconcile",
+ "name": "thinkNXG Attendance Reconcile Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
