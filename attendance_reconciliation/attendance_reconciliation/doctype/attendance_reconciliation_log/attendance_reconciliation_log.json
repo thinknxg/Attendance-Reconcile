@@ -1,0 +1,72 @@
+{
+  "doctype": "DocType",
+  "name": "Attendance Reconciliation Log",
+  "module": "Attendance Reconciliation",
+  "issingle": 0,
+  "track_changes": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "employee",
+    "attendance_date",
+    "previous_attendance",
+    "replacement_attendance",
+    "result",
+    "details"
+  ],
+  "fields": [
+    {
+      "fieldname": "employee",
+      "label": "Employee",
+      "fieldtype": "Link",
+      "options": "Employee",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "attendance_date",
+      "label": "Attendance Date",
+      "fieldtype": "Date",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "previous_attendance",
+      "label": "Cancelled Attendance",
+      "fieldtype": "Link",
+      "options": "Attendance"
+    },
+    {
+      "fieldname": "replacement_attendance",
+      "label": "Replacement Attendance",
+      "fieldtype": "Link",
+      "options": "Attendance"
+    },
+    {
+      "fieldname": "result",
+      "label": "Result",
+      "fieldtype": "Data",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "details",
+      "label": "Audit Details",
+      "fieldtype": "Code",
+      "options": "JSON"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "HR Manager",
+      "read": 1,
+      "report": 1,
+      "export": 1
+    },
+    {
+      "role": "System Manager",
+      "read": 1,
+      "report": 1,
+      "export": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "autoname": "hash"
+}

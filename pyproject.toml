@@ -1,0 +1,16 @@
+[build-system]
+requires = ["flit_core>=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "attendance_reconciliation"
+version = "0.1.0"
+description = "Reconcile late check-ins with Frappe HR attendance"
+authors = [{name = "Attendance Reconciliation Contributors"}]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[tool.bench.frappe-dependencies]
+frappe = ">=15.0.0,<17.0.0"
+erpnext = ">=15.0.0,<17.0.0"
+hrms = ">=15.0.0,<17.0.0"

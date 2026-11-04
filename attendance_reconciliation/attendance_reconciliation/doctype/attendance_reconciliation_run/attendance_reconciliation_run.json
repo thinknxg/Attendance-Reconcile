@@ -1,0 +1,58 @@
+{
+  "doctype": "DocType",
+  "name": "Attendance Reconciliation Run",
+  "module": "Attendance Reconciliation",
+  "issingle": 0,
+  "track_changes": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "from_date",
+    "to_date",
+    "requested_by",
+    "details"
+  ],
+  "fields": [
+    {
+      "fieldname": "from_date",
+      "label": "From Date",
+      "fieldtype": "Date",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "to_date",
+      "label": "To Date",
+      "fieldtype": "Date",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "requested_by",
+      "label": "Requested By",
+      "fieldtype": "Link",
+      "options": "User",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "details",
+      "label": "Results and Review Reasons",
+      "fieldtype": "Code",
+      "options": "JSON"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "HR Manager",
+      "read": 1,
+      "report": 1,
+      "export": 1
+    },
+    {
+      "role": "System Manager",
+      "read": 1,
+      "report": 1,
+      "export": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "autoname": "hash"
+}

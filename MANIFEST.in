@@ -1,0 +1,2 @@
+recursive-include attendance_reconciliation *.json *.js *.txt *.md
+include license.txt
